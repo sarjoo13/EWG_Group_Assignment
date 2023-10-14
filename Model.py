@@ -1,45 +1,21 @@
 import pandas as pd
+import Data as D
 from gurobipy import *
 from itertools import combinations
 
 # Toy Example to check model
 # TODO: With this example, model is infeasible
-# TODO: Implement starting time
 
 # If problem not solvable: Ignore tod and solve basic TSP
-
-df = pd.DataFrame({'s1': [0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2],
-                   's2': [0,0,1,1,2,2,0,0,1,1,2,2,0,0,1,1,2,2],
-                   'tod': [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
-                   'avg_time': [1,2,2,3,4,3,5,2,3,4,3,2,1,2,2,3,3,4]})
-
-num_i = len(df['s1'].unique())
-num_j = len(df['s2'].unique())
-num_t = len(df['tod'].unique())
-
-# TODO: time matrix from Daniela
-s = {}
-for i in range(num_i):
-    for j in range(num_j):
-        for t in range(num_t):
-            s1 = df['s1'].unique()[i]
-            s2 = df['s2'].unique()[j]
-            tod = df['tod'].unique()[t]
-            if df.loc[df['s1']==s1].loc[df['s2']==s2].loc[df['tod']==t].empty:
-                continue
-            else:
-                s[i,j,t] = df.loc[df['s1']==s1].loc[df['s2']==s2].loc[df['tod']==t].iloc[0]['avg_time']
+df = D.route_df
+s = D.matrix
 print(s)
 
-n = len(df['s1'].unique())
-tod = len(df['tod'].unique())
-# TODO: Starting time
-starting_time = 0
+starting_time = D.tod_to_t(D.start_period)
 values = []
 
-N = [i for i in range(n)]
-T = [t for t in range(tod)]
-# TODO when incorporating Danielas matrix: Breaking down tod in 2h-slots and giving most of the the same avg_time
+N = D.aoi_list
+T = [t for t in range(1, 12)]
 A = [(i, j) for i in N for j in N]
 B = [(i,j,t) for i in N for j in N for t in T]
 C = [(i,t) for i in N for t in T]
@@ -70,14 +46,14 @@ M = 25 + eps
 # If a_i > 2t + 1, then d[i,t] = 1
 for i in N:
     for t in T:
-        mdl.addConstr(a[i] >= 30*t+15 + eps - M * (1 - d[i,t]))
-        mdl.addConstr(a[i] <= 30*t+15 + M * d[i,t])
+        mdl.addConstr(a[i] >= 2*t+1 + eps - M * (1 - d[i,t]))
+        mdl.addConstr(a[i] <= 2*t+1 + M * d[i,t])
 # Add indicator constraints
         mdl.addConstr(
             (d[i, t] == 1) >> (sum(x[i, j, t] for j in N) == 0))
 # If a_i < 2t - 1, then c[i,t] = 0
-    mdl.addConstr(a[i] >= 30 * t - 15 + eps - M * (1 - c[i,t]))
-    mdl.addConstr(a[i] <= 30 * t - 15 + M * c[i, t])
+    mdl.addConstr(a[i] >= 2*t-1 + eps - M * (1 - c[i,t]))
+    mdl.addConstr(a[i] <= 2*t-1 + M * c[i, t])
 
 # Add indicator constraints
     mdl.addConstr((c[i, t] == 0) >> (sum(x[i, j, t] for j in N) == 0))
@@ -132,6 +108,24 @@ def subtour(edges):
 
 mdl.optimize(subtourelim)
 
-values.append([mdl.ObjVal])
+if mdl.status == GRB.OPTIMAL:
+    print("Optimal solution found!")
+    #for var in mdl.getVars():
+        #print(f"{var.varName}: {var.x}")
+else:
+    print("No optimal solution found.")
 
+def get_tours():
+    tours = []
+    for var in mdl.getVars():
+        if var.x > 0.9:
+            if var.varName[0] == 'x':
+                comps = var.varName.split(',')
+                i = int(comps[0][2:])
+                j = int(comps[1])
+                tours.append((i,j))
+    return tours
 
+print(get_tours())
+
+# TODO: Check for this specific tour manually !!!
