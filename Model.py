@@ -4,6 +4,9 @@ from itertools import combinations
 
 # Toy Example to check model
 # TODO: With this example, model is infeasible
+# TODO: Implement starting time
+
+# If problem not solvable: Ignore tod and solve basic TSP
 
 df = pd.DataFrame({'s1': [0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2],
                    's2': [0,0,1,1,2,2,0,0,1,1,2,2,0,0,1,1,2,2],
@@ -30,12 +33,14 @@ print(s)
 
 n = len(df['s1'].unique())
 tod = len(df['tod'].unique())
+# TODO: Starting time
+starting_time = 0
 values = []
 
 N = [i for i in range(n)]
 T = [t for t in range(tod)]
 # TODO when incorporating Danielas matrix: Breaking down tod in 2h-slots and giving most of the the same avg_time
-A = [(i, j) for i in N for j in N]     # Set of arcs
+A = [(i, j) for i in N for j in N]
 B = [(i,j,t) for i in N for j in N for t in T]
 C = [(i,t) for i in N for t in T]
 
@@ -43,7 +48,7 @@ C = [(i,t) for i in N for t in T]
 mdl = Model('TDTSP')
 
 # Create variables
-x = mdl.addVars(B, vtype=GRB.BINARY, name="x")  # if a vehicle travels in an arc
+x = mdl.addVars(B, vtype=GRB.BINARY, name="x")
 a = mdl.addVars(N, vtype=GRB.CONTINUOUS, name="a")  # time at which a customer is served
 d = mdl.addVars(C, vtype=GRB.BINARY, name="d")
 c = mdl.addVars(C, vtype=GRB.BINARY, name="c")
@@ -76,6 +81,9 @@ for i in N:
 
 # Add indicator constraints
     mdl.addConstr((c[i, t] == 0) >> (sum(x[i, j, t] for j in N) == 0))
+
+# Starting time
+    mdl.addConstr(a[i] >= starting_time)
 
 # further constraints
 mdl.addConstrs(quicksum(x[i,j,t] for j in N if i != j for t in T) == 1 for i in N)
