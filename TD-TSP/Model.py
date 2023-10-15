@@ -1,15 +1,10 @@
-import pandas as pd
 import Data as D
 from gurobipy import *
 from itertools import combinations
 
-# Toy Example to check model
-# TODO: With this example, model is infeasible
-
-# If problem not solvable: Ignore tod and solve basic TSP
 df = D.route_df
 s = D.matrix
-print(s)
+#print(s)
 
 starting_time = D.tod_to_t(D.start_period)
 values = []
@@ -128,4 +123,4 @@ def get_tours():
 
 print(get_tours())
 
-# TODO: Check for this specific tour manually !!!
+

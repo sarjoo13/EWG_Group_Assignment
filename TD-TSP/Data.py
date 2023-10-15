@@ -1,16 +1,15 @@
 import pandas as pd
-import numpy as np
 
 # whole travel-time dataframe
 
 df = pd.read_csv("sh_undirected_graph_tod.csv")
 df_graph = df.groupby(['s1', 's2', 'tod']).mean().reset_index()
-print(df['tod'].unique())
+#print(df['tod'].unique())
 
 # routes of interest
 df_routes = pd.read_csv("sh_routes_top_20_most_traveled_drivers.csv")
-print(df_routes.shape)
-print(df_routes.loc[1,:])
+#print(df_routes.shape)
+#print(df_routes.loc[1,:])
 
 route = df_routes.loc[1,:]
 
@@ -18,16 +17,16 @@ route = df_routes.loc[1,:]
 str = route.loc['aoi_list']
 comps = str[1:-1].split(',')
 aoi_list = [int(x) for x in comps]
-print(aoi_list)
+#print(aoi_list)
 
 route_df = df_graph.loc[df_graph['s1'].isin(aoi_list)].loc[df_graph['s2'].isin(aoi_list)]
-print(route_df)
+#print(route_df)
 
 # tod list: convert str to int
 str = route.loc['tod_list']
 comps = str[1:-1].split(',')
 tod_list = [int(x) for x in comps]
-print(tod_list)
+#print(tod_list)
 
 start_period = min(tod_list)
 
@@ -80,8 +79,8 @@ for i in range(num_i):
             else:
                 matrix[s1,s2,t2] =route_df.loc[route_df['s1']==s1].loc[route_df['s2']==s2].loc[route_df['tod']==t].iloc[0]['avg_time']
                 count += 1
-print(count) # Number of non-zero entries
-print(matrix)
+#print(count) # Number of non-zero entries
+#print(matrix)
 
 for t in range(1,12):
     if t in periods:
@@ -93,7 +92,7 @@ for t in range(1,12):
                 s2 = route_df['s2'].unique()[j]
                 matrix[s1, s2,t] = 100
 
-print(matrix)
+#print(matrix)
 
 
 def t_to_tod(t):

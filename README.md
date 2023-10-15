@@ -1,14 +1,14 @@
 # EWG_Group_Assignment
 
-Model.py consists of the model that is implemented for a toy-instance defined there. 
-Unfortunately, the toy model seems to be infeasible just now. 
-I'll have to check whether it is due to the instance, the model or the implementation. 
+This repository consists of two models: The standard TSP and the time-dependent TSP (TD-TSP).
 
-Data.py is intended for data reading and preprocessing. 
-However, building the matrix of matrix of interest, needs far too much time. 
-Is there a faster way? 
+The latter is currently unfinished as the model reports for the first test route 
+(actually the second in our set of set of top-20-drivers-routes) infeasibility. 
 
-To do: 
-- Fix the model
-- Fix the data preparation
-- Apply the model to the actual data
+The TSP model on the contrary reports some first results. 
+The folder contains the following files
+- TSP_Data.py which prepares the data from our data sets to fit the model setup
+- TSP_Model.py contains the model. This is the file that should be run in order to obtain our results.
+- sh_routes_top_20_most_traveled_drivers.csv and sh_undirected_graph_tod.csv contain the data necessary for our model.
+- prelim_results.txt reports some lists obtained during our tests
+
